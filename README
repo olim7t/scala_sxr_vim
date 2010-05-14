@@ -1,0 +1,6 @@
+A vim plugin to provide type annotations in Scala files.
+
+This is intended to work with Mark Harrah's "browse" project, but would
+require changes in browse.
+
+Work in progress...
