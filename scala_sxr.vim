@@ -109,7 +109,6 @@ function Annotate()
 endfunction
 
 map <C-I> :call Annotate()<CR>
-imap <C-I> <ESC> <C-I>
 
 " Restore compatibility options
 let &cpo = s:save_cpo
