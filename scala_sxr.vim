@@ -46,8 +46,7 @@ function GetSxrFile()
 	endif
 
 	if (match(b:scala_file, s:scala_dir_abs) == 0)
-		let b:sxr_file = substitute(b:scala_file, s:scala_dir_abs, s:output_dir_abs, "")
-		let b:sxr_file = substitute(b:sxr_file, "\.scala$", ".sxr", "")
+		let b:sxr_file = substitute(b:scala_file, s:scala_dir_abs, s:output_dir_abs, "") . ".txt"
 		return 1
 	else
 		echo b:scala_file . " is not in the directory " . s:scala_dir_abs . ". Set the sxr_scala_dir variable."
@@ -103,7 +102,7 @@ function Annotate()
 	endif
 
 	" Note: requires vim to be compiled with the +byte_offset option
-	let s:offset = line2byte(line(".")) + col(".")
+	let s:offset = line2byte(line(".")) + col(".") - 2
 
 	echo GetAnnotation(s:offset)
 endfunction
