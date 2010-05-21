@@ -137,7 +137,7 @@ function Annotate()
 	echo GetAnnotation(offset)
 endfunction
 
-map <C-I> :call Annotate()<CR>
+map [I :call Annotate()<CR>
 
 " Restore compatibility options
 let &cpo = s:save_cpo
