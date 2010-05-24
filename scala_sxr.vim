@@ -38,8 +38,8 @@ function AutodetectDirs()
 			endif
 		endif
 		if (!exists("g:sxr_output_dir"))
-			" Find a 'classes.sxrt' dir below src's parent
-			let g:sxr_output_dir = finddir("classes.sxrt", src_dir . "/../**")
+			" Find a 'classes.sxr' dir below src's parent
+			let g:sxr_output_dir = finddir("classes.sxr", src_dir . "/../**")
 			if (strlen(g:sxr_output_dir) > 0)
 				echo "Autodetected SXR output directory:\n   " . g:sxr_output_dir
 			else
