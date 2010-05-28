@@ -11,59 +11,95 @@ if exists("b:did_ftplugin")
 endif
 let b:did_ftplugin = 1
 
-" Try to autodetect source and/or output directories (if not manually set) from
-" the currently open file.
-" Updates g:sxr_scala_dir and/or g:sxr_output_dir, returns a boolean indicating if
-" both directories are set after execution.
+let b:autodetect = !exists("g:sxr_disable_autodetect")
+
 if !exists("*s:AutodetectDirs")
+	" Try to autodetect source and output directories from the currently open
+	" file.
+	" Updates b:sxr_scala_dir and b:sxr_output_dir, returns a boolean indicating
+	" if both directories are set after execution.
 	function s:AutodetectDirs()
 		let result = 1
 		" Find an 'src' dir above the file
 		" Note: requires vim to be compiled with the +file_in_path option
 		let src_dir = finddir("src", b:scala_file . ";")
 		if strlen(src_dir) > 0
-			if !exists("g:sxr_scala_dir")
+			if !exists("b:sxr_scala_dir")
 				" Find a 'scala' dir below src
-				let g:sxr_scala_dir = finddir("scala", src_dir . "**")
-				if strlen(g:sxr_scala_dir) == 0
-					unlet g:sxr_scala_dir
+				let b:sxr_scala_dir = finddir("scala", src_dir . "**")
+				if strlen(b:sxr_scala_dir) == 0
+					unlet b:sxr_scala_dir
 				endif
 			endif
-			if !exists("g:sxr_output_dir")
+			if !exists("b:sxr_output_dir")
 				" Find a 'classes.sxr' dir below src's parent
-				let g:sxr_output_dir = finddir("classes.sxr", src_dir . "/../**")
-				if strlen(g:sxr_output_dir) == 0
-					unlet g:sxr_output_dir
+				let b:sxr_output_dir = finddir("classes.sxr", src_dir . "/../**")
+				if strlen(b:sxr_output_dir) == 0
+					unlet b:sxr_output_dir
 				endif
 			endif
 		endif
-		if !exists("g:sxr_scala_dir")
-			echo "Could not autodetect scala directory. Please set manually (:let sxr_scala_dir = ...)"
+		if !exists("b:sxr_scala_dir")
+			echo "Could not autodetect scala directory."
 			let result = 0
 		endif
-		if !exists("g:sxr_output_dir")
-			echo "Could not autodetect SXR output directory. Please set manually (:let sxr_output_dir = ...)"
+		if !exists("b:sxr_output_dir")
+			echo "Could not autodetect SXR output directory."
 			let result = 0
 		endif
 		return result
 	endfunction
 endif
+if !exists("*s:SetDirs")
+	" Sets the source and output directories according to the autodetect mode
+	" Returns a boolean indicating success or failure.
+	function s:SetDirs()
+		if b:autodetect
+			return s:AutodetectDirs()
+		else
+			let result = 1
+			if !exists("b:sxr_scala_dir")
+				if !exists("g:sxr_scala_dir")
+					echo "In manual mode, sxr_scala_dir must be set."
+					let result = 0
+				else
+					let b:sxr_scala_dir = g:sxr_scala_dir
+				endif
+			endif
+			if !exists("b:sxr_output_dir")
+				if !exists("g:sxr_output_dir")
+					echo "In manual mode, sxr_output_dir must be set."
+					let result = 0
+				else
+					let b:sxr_output_dir = g:sxr_output_dir
+				endif
+			endif
+			return result
+		endif
+	endfunction
+endif
 
-" Computes the path of the SXR file corresponding to the current source file,
-" and store its path in the buffer variable b:sxr_file
-" Returns 1 if the function succeeded, 0 otherwise.
+" Absolute, UNIX-style path of the file in this buffer
+let b:scala_file = expand("%:p:gs?\\?/?")
+
 if !exists("*s:GetSxrFile")
+	" Computes the path of the SXR file corresponding to the current source
+	" file, and store its path in the buffer variable b:sxr_file
+	" Returns 1 if the function succeeded, 0 otherwise.
 	function s:GetSxrFile()
-		" Make the path absolute and UNIX-style
-		let scala_dir_abs = fnamemodify(g:sxr_scala_dir, ":p:gs?\\?/?")
+		" If the directories were set manually, we still need to check their
+		" existence
+		let scala_dir_abs = fnamemodify(b:sxr_scala_dir, ":p:gs?\\?/?")
 		if !isdirectory(scala_dir_abs)
 			echo "Invalid directory : " . scala_dir_abs . ". Set the sxr_scala_dir variable."
+			unlet b:sxr_scala_dir
 			unlet! b:sxr_file
 			return 0
 		endif
-		let output_dir_abs = fnamemodify(g:sxr_output_dir, ":p:gs?\\?/?")
+		let output_dir_abs = fnamemodify(b:sxr_output_dir, ":p:gs?\\?/?")
 		if !isdirectory(output_dir_abs)
 			echo "Invalid directory : " . output_dir_abs . ". Set the sxr_output_dir variable."
+			unlet b:sxr_output_dir
 			unlet! b:sxr_file
 			return 0
 		endif
@@ -73,29 +109,25 @@ if !exists("*s:GetSxrFile")
 			return 1
 		else
 			echo b:scala_file . " is not in the directory " . scala_dir_abs . ". Set the sxr_scala_dir variable."
+			unlet b:sxr_scala_dir
 			unlet! b:sxr_file
 			return 0
 		endif
 	endfunction
 endif
 
-" Loads the annotation data and stores it in the buffer variable b:sxr_data
-" Returns 1 if the function succeeded, 0 otherwise.
 if !exists("*s:Load")
+	" Loads the annotation data and stores it in the buffer variable b:sxr_data
+	" Returns 1 if the function succeeded, 0 otherwise.
 	function s:Load()
-		if !exists("b:scala_file")
-			" Note: requires vim to be compiled with the +modify_fname option
-			" (run 'vim --version' to check)
-			let b:scala_file = expand("%:p:gs?\\?/?")
-		endif
-		if !(exists("g:sxr_scala_dir") && exists("g:sxr_output_dir")) && !s:AutodetectDirs()
+		if !(exists("b:sxr_scala_dir") && exists("b:sxr_output_dir")) && !s:SetDirs()
 			return 0
 		endif
 		if !exists("b:sxr_file") && !s:GetSxrFile()
 			return 0
 		endif
 		if !filereadable(b:sxr_file)
-			echo b:sxr_file . " does not exist or can't be read"
+			echo b:sxr_file . " does not exist or can't be read. Check the value of sxr_output_dir."
 			return 0
 		endif
 		" Load data if not cached or stale
@@ -107,10 +139,10 @@ if !exists("*s:Load")
 	endfunction
 endif
 
-" Retrieves a piece of SXR data for the current offset.
-" @param index the index of the data we want
-" @param default the value to return if the data does not exist
 if !exists("*s:GetSxrData")
+	" Retrieves a token (identified by its index) from the line corresponding to
+	" the current offset in the SXR data file.
+	" Returns "default" if the data does not exist.
 	function s:GetSxrData(index, default)
 		" Note: requires vim to be compiled with the +byte_offset option
 		let offset = line2byte(line(".")) + col(".") - 2
@@ -132,8 +164,8 @@ if !exists("*s:GetSxrData")
 	endfunction
 endif
 
-" Echoes the type annotation for the current cursor position
 if !exists("*s:Annotate")
+	" Echoes the type annotation for the current cursor position
 	function s:Annotate()
 		if !s:Load()
 			return
@@ -143,13 +175,14 @@ if !exists("*s:Annotate")
 endif
 
 if !exists("*s:SetTags")
+	" Adds the tag file for the current buffer to the global tags variable
 	function s:SetTags()
-		execute "set tags+=" . findfile("tags", g:sxr_output_dir)
+		execute "set tags+=" . findfile("tags", b:sxr_output_dir)
 	endfunction
 endif
 
-" Jump to the declaration of the symbol at the current position
 if !exists("*s:JumpTo")
+	" Jumps to the declaration of the symbol at the current position
 	function s:JumpTo()
 		if !s:Load()
 			return
@@ -165,19 +198,6 @@ if !exists("*s:JumpTo")
 		endif
 	endfunction
 endif
-
-
-
-" Try to set the tags the first time the script is loaded. This will allow
-" non-remapped tag commands to work before the first call to <C-]>.
-if !exists("s:loaded")
-	let b:scala_file = expand("%:p:gs?\\?/?")
-	call s:AutodetectDirs()
-	if exists("g:sxr_output_dir")
-		call s:SetTags()
-	endif
-endif
-let s:loaded = 1
 
 
 
