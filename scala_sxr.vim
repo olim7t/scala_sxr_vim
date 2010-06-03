@@ -177,7 +177,8 @@ endif
 if !exists("*s:SetTags")
 	" Adds the tag file for the current buffer to the global tags variable
 	function s:SetTags()
-		execute "set tags+=" . findfile("tags", b:sxr_output_dir)
+		execute "set tags+=" . findfile("public-tags", b:sxr_output_dir)
+		execute "set tags+=" . findfile("private-tags", b:sxr_output_dir)
 	endfunction
 endif
 
