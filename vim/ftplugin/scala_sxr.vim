@@ -23,8 +23,25 @@ let b:did_ftplugin = 1
 
 let b:autodetect = !exists("g:sxr_disable_autodetect")
 
+if !exists("*s:SetTags")
+	" Configures the tag files for the current buffer
+	function s:SetTags()
+		execute "setlocal tags+=" . findfile("public-tags", b:sxr_output_dir)
+		execute "setlocal tags+=" . findfile("private-tags", b:sxr_output_dir)
+
+		" If this file exists, it contains a list of additional tag files
+		" coming from external projects.
+		let remote_tag_files = findfile("remote-public-tags", b:sxr_output_dir)
+		if strlen(remote_tag_files) > 0 && filereadable(remote_tag_files)
+			for remote_tag_file in readfile(remote_tag_files)
+				execute "setlocal tags+=" . remote_tag_file
+			endfor
+		endif
+	endfunction
+endif
+
 if !exists("*s:AutodetectDirs")
-	" Try to autodetect source and output directories from the currently open
+	" Tries to autodetect source and output directories from the currently open
 	" file.
 	" Updates b:sxr_scala_dir and b:sxr_output_dir, returns a boolean indicating
 	" if both directories are set after execution.
@@ -46,6 +63,8 @@ if !exists("*s:AutodetectDirs")
 				let b:sxr_output_dir = finddir("classes.sxr", src_dir . "/../**")
 				if strlen(b:sxr_output_dir) == 0
 					unlet b:sxr_output_dir
+				else
+					call s:SetTags()
 				endif
 			endif
 		endif
@@ -82,6 +101,7 @@ if !exists("*s:SetDirs")
 					let result = 0
 				else
 					let b:sxr_output_dir = g:sxr_output_dir
+					call s:SetTags()
 				endif
 			endif
 			return result
@@ -184,14 +204,6 @@ if !exists("*s:Annotate")
 	endfunction
 endif
 
-if !exists("*s:SetTags")
-	" Adds the tag file for the current buffer to the global tags variable
-	function s:SetTags()
-		execute "set tags+=" . findfile("public-tags", b:sxr_output_dir)
-		execute "set tags+=" . findfile("private-tags", b:sxr_output_dir)
-	endfunction
-endif
-
 if !exists("*s:JumpTo")
 	" Jumps to the declaration of the symbol at the current position
 	function s:JumpTo()
@@ -202,9 +214,6 @@ if !exists("*s:JumpTo")
 		if strlen(tag_name) == 0
 			echo "No link here."
 		else
-			" Set the tags each time, to handle an eventual change of
-			" sxr_output_dir
-			call s:SetTags()
 			execute "tag " . tag_name
 		endif
 	endfunction
