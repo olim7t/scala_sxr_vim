@@ -1,6 +1,6 @@
 # 1. Getting scala_sxr.vim
 
-Go to http://github.com/olim7t/scala_sxr_vim/downloads and grab the latest version.
+Go to [the downloads section](http://github.com/olim7t/scala_sxr_vim/downloads) and grab the latest version.
 
 # 2. Installing scala_sxr.vim
 
@@ -10,7 +10,7 @@ Then edit `$HOME/.vimrc` and make sure it contains the following line:
 
 	filetype plugin on
 
-_Note:_ if you're already using Vim to edit Scala files, you probably have the indent and syntax files installed (see http://www.scala-lang.org/node/91#tool_support). In that case, `ftdetect/scala.vim` already exists; you don't need to overwrite it.
+_Note:_ if you're already using Vim to edit Scala files, you probably have the indent and syntax files installed (see [here](http://www.scala-lang.org/node/91#tool_support)). In that case, `ftdetect/scala.vim` already exists; you don't need to overwrite it.
 
 If things are not working, here are a few commands you can run from Vim:
 
@@ -28,11 +28,11 @@ If you're going to use sbt with `AutoCompilerPlugins` (see 4.1), you don't need 
 
 ## 3.1. Getting from the scala-tools repository
 
-Go to http://scala-tools.org/repo-releases/org/scala-tools/sxr and download the file corresponding to your Scala version.
+Go to [the scala-tools repository](http://scala-tools.org/repo-releases/org/scala-tools/sxr) and download the file corresponding to your Scala version.
 
 ## 3.2. Building from source
 
-Go to http://github.com/harrah/browse and follow the instructions in `README`.
+Go to [the sxr site](http://github.com/harrah/browse) and follow the instructions in `README`.
 
 
 # 4. Configuring sxr for your Scala project
@@ -41,16 +41,16 @@ The `test_project` directory contains a dummy project configured for both sbt an
 
 ## 4.1. Using sbt
 
-See http://github.com/olim7t/scala_sxr_vim/blob/master/test_project/project/build/TestProject.scala. There are two ways to configure sxr with sbt (both are showed in the example, one being commented):
+See [TestProject.scala](http://github.com/olim7t/scala_sxr_vim/blob/master/test_project/project/build/TestProject.scala). There are two ways to configure sxr with sbt (both are showed in the example, one being commented):
 
 * have your project class mix in `AutoCompilerPlugins` to retrieve the sxr dependency from a repository;
 * manually set the `-Xplugin:` compiler option to use a local copy of sxr.
 
-If you have a multi-module project and wish to run sxr on all sources at once, see this example: http://github.com/harrah/xsbt/blob/master/project/build/Sxr.scala
+If you have a multi-module project and wish to run sxr on all sources at once, see [this example](http://github.com/harrah/xsbt/blob/master/project/build/Sxr.scala).
 
 ## 4.2. Using Maven
 
-See http://github.com/olim7t/scala_sxr_vim/blob/master/test_project/pom.xml.
+See [pom.xml](http://github.com/olim7t/scala_sxr_vim/blob/master/test_project/pom.xml).
 
 _For now, the only option is to use a local copy of sxr. I have yet to investigate retrieving the dependency from a repository and multi-module builds._
 
