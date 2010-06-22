@@ -22,9 +22,9 @@ More complex setups (like installing for all users) are not covered here; if you
 
 # 3. Getting sxr
 
-scala_sxr.vim needs version 0.2.5 or higher of sxr.
+scala_sxr.vim needs sxr version 0.2.5 or higher.
 
-If you're going to use sbt with `AutoCompilerPlugins` (see 4.1), you don't need to download sxr manually; skip part 3.1.
+If you're going to use sbt with `AutoCompilerPlugins` (see 4.1), you don't need to download sxr manually; skip part 3.
 
 ## 3.1. Getting from the scala-tools repository
 
