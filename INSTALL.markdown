@@ -22,9 +22,9 @@ More complex setups (like installing for all users) are not covered here; if you
 
 # 3. Getting sxr
 
-_scala_sxr.vim needs version 0.2.5 of sxr, which has not been released at the time of writing (this should come shortly). The only option for now is to build from source (see 3.2)._
+scala_sxr.vim needs version 0.2.5 or higher of sxr.
 
-If you're going to use sbt with `AutoCompilerPlugins` (see 4.1), you don't need to download sxr manually.
+If you're going to use sbt with `AutoCompilerPlugins` (see 4.1), you don't need to download sxr manually; skip part 3.1.
 
 ## 3.1. Getting from the scala-tools repository
 
@@ -43,7 +43,7 @@ The `test_project` directory contains a dummy project configured for both sbt an
 
 See [TestProject.scala](http://github.com/olim7t/scala_sxr_vim/blob/master/test_project/project/build/TestProject.scala). There are two ways to configure sxr with sbt (both are showed in the example, one being commented):
 
-* have your project class mix in `AutoCompilerPlugins` to retrieve the sxr dependency from a repository;
+* have your project class mix in `AutoCompilerPlugins` to retrieve the sxr dependency from a repository (if sbt is giving you `bad option` errors, try running the `update` action);
 * manually set the `-Xplugin:` compiler option to use a local copy of sxr.
 
 If you have a multi-module project and wish to run sxr on all sources at once, see [this example](http://github.com/harrah/xsbt/blob/master/project/build/Sxr.scala).
@@ -67,7 +67,7 @@ cd to `test_project` and run `sbt clean compile` or `mvn clean compile`. This sh
 ## 5.1. Basic workflow
 
 * edit your Scala files;
-* compile (this will invoke sxr which will update its data files). This can be done automatically by enabling continuous compilation (`~compile` from within sbt, or `mvn scala:cc`);
+* compile (this will invoke sxr which will update its data files). This can be done automatically by enabling continuous compilation (`~compile` from the sbt prompt, or `mvn scala:cc`);
 * use the Vim shortcuts to get type information or navigate between files.
 
 ## 5.2. Directory detection
