@@ -1,7 +1,7 @@
 " Vim filetype plugin to provide type annotations and improved tag support in
 " Scala source files.
 "
-" Version: 1.0.0
+" Version: 1.0.1-SNAPSHOT
 " (c) 2010 Olivier Michallat (http://github.com/olim7t/scala_sxr_vim)
 " License: new BSD (http://www.opensource.org/licenses/bsd-license.php)
 "
