@@ -23,6 +23,10 @@ let b:did_ftplugin = 1
 
 let b:autodetect = !exists("g:sxr_disable_autodetect")
 
+" Lists possible source directories for typical layouts, with the relative path
+" to search the output directory.
+let s:dir_templates = {'src/main/scala' : '../../..', 'src/test/scala' : '../../..' }
+
 if !exists("*s:SetTags")
 	" Configures the tag files for the current buffer
 	function s:SetTags()
@@ -46,39 +50,39 @@ if !exists("*s:AutodetectDirs")
 	" Updates b:sxr_scala_dir and b:sxr_output_dir, returns a boolean indicating
 	" if both directories are set after execution.
 	function s:AutodetectDirs()
-		let result = 1
-		" Find an 'src' dir above the file
-		" Note: requires vim to be compiled with the +file_in_path option
-		let src_dir = finddir("src", b:scala_file . ";")
-		if strlen(src_dir) > 0
-			if !exists("b:sxr_scala_dir")
-				" Find a 'scala' dir below src
-				let b:sxr_scala_dir = finddir("scala", src_dir . "**")
-				if strlen(b:sxr_scala_dir) == 0
-					unlet b:sxr_scala_dir
+		if !exists("b:sxr_scala_dir")
+			" Search one of the typical source directories above the file
+			" Note: requires vim to be compiled with the +file_in_path option
+			for template in keys(s:dir_templates)
+				let b:sxr_scala_dir = finddir(template, b:scala_file . ";")
+				if strlen(b:sxr_scala_dir) != 0
+					let b:relative_output_base = s:dir_templates[template]
+					break
 				endif
-			endif
-			if !exists("b:sxr_output_dir")
-				" Find a 'classes.sxr' dir below src's parent
-				let b:sxr_output_dir = finddir("classes.sxr", src_dir . "/../**")
-				if strlen(b:sxr_output_dir) == 0
-					unlet b:sxr_output_dir
-				else
-					call s:SetTags()
-				endif
+			endfor
+			if (strlen(b:sxr_scala_dir) == 0)
+				unlet b:sxr_scala_dir
 			endif
 		endif
 		if !exists("b:sxr_scala_dir")
 			echo "Could not autodetect scala directory."
-			let result = 0
+			return 0
+		endif
+
+		let b:sxr_output_dir = finddir("classes.sxr", b:sxr_scala_dir . "/" . b:relative_output_base . "/**")
+		if strlen(b:sxr_output_dir) != 0
+			call s:SetTags()
+		else
+			unlet b:sxr_output_dir
 		endif
 		if !exists("b:sxr_output_dir")
 			echo "Could not autodetect SXR output directory."
-			let result = 0
+			return 0
 		endif
-		return result
+		return 1
 	endfunction
 endif
+
 if !exists("*s:SetDirs")
 	" Sets the source and output directories according to the autodetect mode
 	" Returns a boolean indicating success or failure.
