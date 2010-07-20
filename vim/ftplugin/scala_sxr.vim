@@ -23,9 +23,8 @@ let b:did_ftplugin = 1
 
 let b:autodetect = !exists("g:sxr_disable_autodetect")
 
-" Lists possible source directories for typical layouts, with the relative path
-" to search the output directory.
-let s:dir_templates = {'src/main/scala' : '../../..', 'src/test/scala' : '../../..' }
+" Maps source to output directories for typical layouts
+let s:dir_templates = {'src/main/scala' : 'classes.sxr', 'src/test/scala' : 'test-classes.sxr'}
 
 if !exists("*s:SetTags")
 	" Configures the tag files for the current buffer
@@ -54,9 +53,11 @@ if !exists("*s:AutodetectDirs")
 			" Search one of the typical source directories above the file
 			" Note: requires vim to be compiled with the +file_in_path option
 			for template in keys(s:dir_templates)
-				let b:sxr_scala_dir = finddir(template, b:scala_file . ";")
-				if strlen(b:sxr_scala_dir) != 0
-					let b:relative_output_base = s:dir_templates[template]
+				let idx = stridx(b:scala_file, template)
+				if (idx > -1)
+					let b:sxr_scala_dir = strpart(b:scala_file, 0, idx + strlen(template))
+					let b:sxr_base_dir = strpart(b:scala_file, 0, idx)
+					let b:sxr_output_dir_name = s:dir_templates[template]
 					break
 				endif
 			endfor
@@ -69,7 +70,7 @@ if !exists("*s:AutodetectDirs")
 			return 0
 		endif
 
-		let b:sxr_output_dir = finddir("classes.sxr", b:sxr_scala_dir . "/" . b:relative_output_base . "/**")
+		let b:sxr_output_dir = finddir(b:sxr_output_dir_name, b:sxr_base_dir . "**")
 		if strlen(b:sxr_output_dir) != 0
 			call s:SetTags()
 		else
