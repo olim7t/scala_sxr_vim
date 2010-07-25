@@ -37,20 +37,20 @@ Go to [the sxr site](http://github.com/harrah/browse) and follow the instruction
 
 # 4. Configuring sxr for your Scala project
 
-The `test_project` directory contains a dummy project configured for both sbt and Maven.
+See my other github project [sample_scala](http://github.com/olim7t/sample_scala), which contains a dummy project configured for both sbt and Maven.
 
 ## 4.1. Using sbt
 
-See [TestProject.scala](http://github.com/olim7t/scala_sxr_vim/blob/master/test_project/project/build/TestProject.scala). There are two ways to configure sxr with sbt (both are showed in the example, one being commented):
+See [Project.scala](http://github.com/olim7t/sample_scala/blob/master/project/build/Project.scala). The main project class must mix in one of these two traits:
 
-* have your project class mix in `AutoCompilerPlugins` to retrieve the sxr dependency from a repository (if sbt is giving you `bad option` errors, try running the `update` action);
-* manually set the `-Xplugin:` compiler option to use a local copy of sxr.
+* `SxrAutoConfig` to retrieve the sxr dependency from a repository (if sbt is giving you `bad option` errors, try running the `update` action);
+* `SxrLocalConfig` to use a local build of sxr.
 
-If you have a multi-module project and wish to run sxr on all sources at once, see [this example](http://github.com/harrah/xsbt/blob/master/project/build/Sxr.scala).
+These two traits extend `SxrBaseConfig`, which contains common configuration to enable linking from the test sources to the main sources. _Note: the current sxr distribution (0.2.6) contains a bug that prevents linking between source directories; this will be corrected in sxr 0.2.7; in the meantime, you can build sxr from source._
 
 ## 4.2. Using Maven
 
-See [pom.xml](http://github.com/olim7t/scala_sxr_vim/blob/master/test_project/pom.xml).
+See [pom.xml](http://github.com/olim7t/sample_scala/blob/master/pom.xml).
 
 _For now, the only option is to use a local copy of sxr. I have yet to investigate retrieving the dependency from a repository and multi-module builds._
 
@@ -62,7 +62,7 @@ sxr can also generate an HTML cross-reference of your Scala source files (actual
 
 # 5. Using scala_sxr.vim
 
-cd to `test_project` and run `sbt clean compile` or `mvn clean compile`. This should create a `target` directory containing a `classes.sxr` subdirectory (with sbt, it will be in `target/scala_<version>`). This is where sxr stores the data that scala_sxr.vim uses.
+Clone `sample_scala` and run `sbt clean compile` or `mvn clean compile`. This should create a `target` directory containing a `classes.sxr` subdirectory (with sbt, it will be in `target/scala_<version>`). This is where sxr stores the data that scala_sxr.vim uses.
 
 ## 5.1. Basic workflow
 
